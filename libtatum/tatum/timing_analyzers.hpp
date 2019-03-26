@@ -124,7 +124,7 @@
  * at each node in the timing graph.
  */
 
- /* XXX TODO: these features haven't yet been implemented!
+/* XXX TODO: these features haven't yet been implemented!
  * ======================================================
  *
  * Derating & Pesimism Reduction Techniques

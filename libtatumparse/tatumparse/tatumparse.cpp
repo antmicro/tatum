@@ -6,7 +6,6 @@
 #include "tatumparse_lexer.hpp"
 #include "tatumparse_error.hpp"
 
-
 namespace tatumparse {
 
 /*
@@ -21,7 +20,7 @@ void tatum_parse_filename(std::string filename, Callback& callback) {
 
 void tatum_parse_filename(const char* filename, Callback& callback) {
     FILE* infile = std::fopen(filename, "r");
-    if(infile != NULL) {
+    if (infile != NULL) {
         //Parse the file
         tatum_parse_file(infile, callback, filename);
 
@@ -32,7 +31,6 @@ void tatum_parse_filename(const char* filename, Callback& callback) {
 }
 
 void tatum_parse_file(FILE* tatum_file, Callback& callback, const char* filename) {
-
     //Initialize the lexer
     Lexer lexer(tatum_file, callback);
 
@@ -43,11 +41,11 @@ void tatum_parse_file(FILE* tatum_file, Callback& callback, const char* filename
     callback.start_parse();
 
     //Tell the caller the file name
-    callback.filename(filename); 
+    callback.filename(filename);
 
     //Do the actual parse
     int error = parser.parse();
-    if(error) {
+    if (error) {
         tatum_error_wrap(callback, 0, "", "File failed to parse.\n");
     }
 
@@ -55,4 +53,4 @@ void tatum_parse_file(FILE* tatum_file, Callback& callback, const char* filename
     callback.finish_parse();
 }
 
-}
+}  // namespace tatumparse

@@ -11,7 +11,6 @@
 
 #include "tatum/util/tatum_assert.hpp"
 
-
 namespace tatum {
 
 /** \file
@@ -68,7 +67,7 @@ namespace tatum {
  * \f]
  */
 
- /**
+/**
  * Setup Analysis Implementation
  * ===============================
  * When we perform setup analysis we follow the formulation of (2), by performing two key operations: traversing
@@ -125,15 +124,14 @@ namespace tatum {
  * \see CommonAnalysisVisitor
  */
 class SetupAnalysis : public detail::CommonAnalysisVisitor<detail::SetupAnalysisOps> {
-
     public:
-        SetupAnalysis(size_t num_tags, size_t num_slacks)
-            : detail::CommonAnalysisVisitor<detail::SetupAnalysisOps>(num_tags, num_slacks) {}
+    SetupAnalysis(size_t num_tags, size_t num_slacks)
+        : detail::CommonAnalysisVisitor<detail::SetupAnalysisOps>(num_tags, num_slacks) {}
 
-        TimingTags::tag_range setup_tags(const NodeId node) const { return ops_.get_tags(node); }
-        TimingTags::tag_range setup_tags(const NodeId node, TagType type) const { return ops_.get_tags(node, type); }
-        TimingTags::tag_range setup_edge_slacks(const EdgeId edge) const { return ops_.get_edge_slacks(edge); }
-        TimingTags::tag_range setup_node_slacks(const NodeId node) const { return ops_.get_node_slacks(node); }
+    TimingTags::tag_range setup_tags(const NodeId node) const { return ops_.get_tags(node); }
+    TimingTags::tag_range setup_tags(const NodeId node, TagType type) const { return ops_.get_tags(node, type); }
+    TimingTags::tag_range setup_edge_slacks(const EdgeId edge) const { return ops_.get_edge_slacks(edge); }
+    TimingTags::tag_range setup_node_slacks(const NodeId node) const { return ops_.get_node_slacks(node); }
 };
 
-} //namepsace
+}  // namespace tatum

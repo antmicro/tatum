@@ -23,23 +23,23 @@ namespace tatum {
  */
 class TimingAnalyzer {
     public:
-        virtual ~TimingAnalyzer() {}
+    virtual ~TimingAnalyzer() {}
 
-        ///Perform timing analysis to update timing information (i.e. arrival & required times)
-        void update_timing() { update_timing_impl(); }
+    ///Perform timing analysis to update timing information (i.e. arrival & required times)
+    void update_timing() { update_timing_impl(); }
 
-        double get_profiling_data(std::string key) const { return get_profiling_data_impl(key); }
+    double get_profiling_data(std::string key) const { return get_profiling_data_impl(key); }
 
-        virtual size_t num_unconstrained_startpoints() const { return num_unconstrained_startpoints_impl(); }
-        virtual size_t num_unconstrained_endpoints() const { return num_unconstrained_endpoints_impl(); }
+    virtual size_t num_unconstrained_startpoints() const { return num_unconstrained_startpoints_impl(); }
+    virtual size_t num_unconstrained_endpoints() const { return num_unconstrained_endpoints_impl(); }
 
     protected:
-        virtual void update_timing_impl() = 0;
+    virtual void update_timing_impl() = 0;
 
-        virtual double get_profiling_data_impl(std::string key) const = 0;
+    virtual double get_profiling_data_impl(std::string key) const = 0;
 
-        virtual size_t num_unconstrained_startpoints_impl() const = 0;
-        virtual size_t num_unconstrained_endpoints_impl() const = 0;
+    virtual size_t num_unconstrained_startpoints_impl() const = 0;
+    virtual size_t num_unconstrained_endpoints_impl() const = 0;
 };
 
-} //namepsace
+}  // namespace tatum

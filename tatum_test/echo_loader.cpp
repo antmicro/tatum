@@ -18,11 +18,11 @@ void EchoLoader::add_edge(int edge_id, tatumparse::EdgeType type, int src_node_i
     tg_->disable_edge(created_edge_id, disabled);
 }
 
-void EchoLoader::finish_graph() { 
-    max_delay_edges_.resize(tg_->edges().size()); 
-    min_delay_edges_.resize(tg_->edges().size()); 
-    setup_times_.resize(tg_->edges().size()); 
-    hold_times_.resize(tg_->edges().size()); 
+void EchoLoader::finish_graph() {
+    max_delay_edges_.resize(tg_->edges().size());
+    min_delay_edges_.resize(tg_->edges().size());
+    setup_times_.resize(tg_->edges().size());
+    hold_times_.resize(tg_->edges().size());
 }
 
 void EchoLoader::add_clock_domain(int domain_id, std::string name) {
@@ -116,13 +116,13 @@ std::unique_ptr<GoldenReference> EchoLoader::golden_reference() {
 }
 
 tatum::NodeType EchoLoader::to_tatum_node_type(tatumparse::NodeType type) {
-    if(type == tatumparse::NodeType::SOURCE) {
+    if (type == tatumparse::NodeType::SOURCE) {
         return tatum::NodeType::SOURCE;
-    } else if(type == tatumparse::NodeType::SINK) {
+    } else if (type == tatumparse::NodeType::SINK) {
         return tatum::NodeType::SINK;
-    } else if(type == tatumparse::NodeType::IPIN) {
+    } else if (type == tatumparse::NodeType::IPIN) {
         return tatum::NodeType::IPIN;
-    } else if(type == tatumparse::NodeType::CPIN) {
+    } else if (type == tatumparse::NodeType::CPIN) {
         return tatum::NodeType::CPIN;
     } else {
         TATUM_ASSERT(type == tatumparse::NodeType::OPIN);
@@ -131,11 +131,11 @@ tatum::NodeType EchoLoader::to_tatum_node_type(tatumparse::NodeType type) {
 }
 
 tatum::EdgeType EchoLoader::to_tatum_edge_type(tatumparse::EdgeType type) {
-    if(type == tatumparse::EdgeType::PRIMITIVE_COMBINATIONAL) {
+    if (type == tatumparse::EdgeType::PRIMITIVE_COMBINATIONAL) {
         return tatum::EdgeType::PRIMITIVE_COMBINATIONAL;
-    } else if(type == tatumparse::EdgeType::PRIMITIVE_CLOCK_LAUNCH) {
+    } else if (type == tatumparse::EdgeType::PRIMITIVE_CLOCK_LAUNCH) {
         return tatum::EdgeType::PRIMITIVE_CLOCK_LAUNCH;
-    } else if(type == tatumparse::EdgeType::PRIMITIVE_CLOCK_CAPTURE) {
+    } else if (type == tatumparse::EdgeType::PRIMITIVE_CLOCK_CAPTURE) {
         return tatum::EdgeType::PRIMITIVE_CLOCK_CAPTURE;
     } else {
         TATUM_ASSERT(type == tatumparse::EdgeType::INTERCONNECT);

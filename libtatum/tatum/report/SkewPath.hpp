@@ -19,5 +19,5 @@ struct SkewPath {
     Time clock_skew;
 };
 
-}
+}  // namespace tatum
 #endif

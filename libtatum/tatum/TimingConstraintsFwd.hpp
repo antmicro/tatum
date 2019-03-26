@@ -7,4 +7,4 @@ struct DomainPair;
 struct IoConstraint;
 class TimingConstraints;
 
-} //namepsace
+}  // namespace tatum

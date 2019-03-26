@@ -17,15 +17,14 @@ float relative_error(float A, float B) {
     }
 }
 
-void remap_delay_calculator(const tatum::TimingGraph& tg, tatum::FixedDelayCalculator& dc, const tatum::util::linear_map<EdgeId,EdgeId>& edge_id_map) {
-
-    tatum::util::linear_map<EdgeId,Time> max_edge_delays(edge_id_map.size());
-    tatum::util::linear_map<EdgeId,Time> setup_times(edge_id_map.size());
-    tatum::util::linear_map<EdgeId,Time> min_edge_delays(edge_id_map.size());
-    tatum::util::linear_map<EdgeId,Time> hold_times(edge_id_map.size());
+void remap_delay_calculator(const tatum::TimingGraph& tg, tatum::FixedDelayCalculator& dc, const tatum::util::linear_map<EdgeId, EdgeId>& edge_id_map) {
+    tatum::util::linear_map<EdgeId, Time> max_edge_delays(edge_id_map.size());
+    tatum::util::linear_map<EdgeId, Time> setup_times(edge_id_map.size());
+    tatum::util::linear_map<EdgeId, Time> min_edge_delays(edge_id_map.size());
+    tatum::util::linear_map<EdgeId, Time> hold_times(edge_id_map.size());
 
     //Re-map
-    for(size_t iedge = 0; iedge < edge_id_map.size(); ++iedge) {
+    for (size_t iedge = 0; iedge < edge_id_map.size(); ++iedge) {
         EdgeId old_edge(iedge);
         EdgeId new_edge = edge_id_map[old_edge];
 
@@ -33,7 +32,6 @@ void remap_delay_calculator(const tatum::TimingGraph& tg, tatum::FixedDelayCalcu
         setup_times[new_edge] = dc.setup_time(tg, old_edge);
         min_edge_delays[new_edge] = dc.min_edge_delay(tg, old_edge);
         hold_times[new_edge] = dc.hold_time(tg, old_edge);
-
     }
 
     //Update

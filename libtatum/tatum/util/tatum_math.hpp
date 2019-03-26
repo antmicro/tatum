@@ -2,7 +2,8 @@
 #define TATUM_MATH_HPP
 #include <cmath>
 
-namespace tatum { namespace util {
+namespace tatum {
+namespace util {
 
 inline float absolute_error(float a, float b) {
     return std::fabs(a - b);
@@ -27,6 +28,7 @@ inline bool nearly_equal(const float lhs, const float rhs, const float abs_err_t
     return (abs_err <= abs_err_tol) || (rel_err <= rel_err_tol);
 }
 
-}} //namspace
+}  // namespace util
+}  // namespace tatum
 
 #endif

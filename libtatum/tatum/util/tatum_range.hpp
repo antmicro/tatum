@@ -2,7 +2,8 @@
 #define TATUM_RANGE_H
 #include <iterator>
 
-namespace tatum { namespace util {
+namespace tatum {
+namespace util {
 /*
  * The tatum::Range template models a range defined by two iterators of type T.
  *
@@ -40,16 +41,20 @@ namespace tatum { namespace util {
 template<typename T>
 class Range {
     public:
-        typedef T iterator;
+    typedef T iterator;
+
     public:
-        Range(T b, T e): begin_(b), end_(e) {}
-        T begin() const { return begin_; }
-        T end() const { return end_; }
-        bool empty() const { return begin_ == end_; }
-        size_t size() const { return std::distance(begin_, end_); }
+    Range(T b, T e)
+        : begin_(b)
+        , end_(e) {}
+    T begin() const { return begin_; }
+    T end() const { return end_; }
+    bool empty() const { return begin_ == end_; }
+    size_t size() const { return std::distance(begin_, end_); }
+
     private:
-        T begin_;
-        T end_;
+    T begin_;
+    T end_;
 };
 
 /*
@@ -64,6 +69,7 @@ class Range {
 template<typename T>
 Range<T> make_range(T b, T e) { return Range<T>(b, e); }
 
-}} //namespace
+}  // namespace util
+}  // namespace tatum
 
 #endif

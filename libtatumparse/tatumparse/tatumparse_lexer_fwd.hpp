@@ -3,7 +3,7 @@
 
 //Forward declaration used by parser definition
 namespace tatumparse {
-    class Lexer;
+class Lexer;
 }
 
 #endif

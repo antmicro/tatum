@@ -9,5 +9,4 @@ class ParallelLevelizedWalker;
 ///The default parallel graph walker
 using ParallelWalker = ParallelLevelizedWalker;
 
-} //namespace
-
+}  // namespace tatum

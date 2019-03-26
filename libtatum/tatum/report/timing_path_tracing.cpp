@@ -3,19 +3,18 @@
 #include "tatum/TimingGraph.hpp"
 #include "tatum/tags/TimingTags.hpp"
 
-namespace tatum { namespace detail {
+namespace tatum {
+namespace detail {
 
 NodeId find_startpoint(const TimingSubPath& path);
 NodeId find_endpoint(const TimingSubPath& path);
 
 TimingPath trace_path(const TimingGraph& timing_graph,
-                      const detail::TagRetriever& tag_retriever, 
-                      const DomainId launch_domain,
-                      const DomainId capture_domain,
-                      const NodeId data_capture_node) {
-
+    const detail::TagRetriever& tag_retriever,
+    const DomainId launch_domain,
+    const DomainId capture_domain,
+    const NodeId data_capture_node) {
     TATUM_ASSERT(timing_graph.node_type(data_capture_node) == NodeType::SINK);
-
 
     //Record the slack at the sink node
     TimingTag slack_tag;
@@ -25,24 +24,24 @@ TimingPath trace_path(const TimingGraph& timing_graph,
     slack_tag = *iter;
 
     TimingSubPath data_arrival_path = trace_data_arrival_path(timing_graph,
-                                                              tag_retriever,
-                                                              launch_domain,
-                                                              capture_domain,
-                                                              data_capture_node);
+        tag_retriever,
+        launch_domain,
+        capture_domain,
+        data_capture_node);
 
     TATUM_ASSERT(!data_arrival_path.elements().empty());
     NodeId data_launch_node = data_arrival_path.elements().begin()->node();
     TimingSubPath clock_launch_path = trace_clock_launch_path(timing_graph,
-                                                              tag_retriever,
-                                                              launch_domain,
-                                                              capture_domain,
-                                                              data_launch_node);
+        tag_retriever,
+        launch_domain,
+        capture_domain,
+        data_launch_node);
 
     TimingSubPath clock_capture_path = trace_clock_capture_path(timing_graph,
-                                                                tag_retriever,
-                                                                launch_domain,
-                                                                capture_domain,
-                                                                data_capture_node);
+        tag_retriever,
+        launch_domain,
+        capture_domain,
+        data_capture_node);
     //Record the required time
     auto required_tags = tag_retriever.tags(data_capture_node, TagType::DATA_REQUIRED);
     auto req_iter = find_tag(required_tags, launch_domain, capture_domain);
@@ -50,34 +49,34 @@ TimingPath trace_path(const TimingGraph& timing_graph,
     TimingPathElem data_required_element = TimingPathElem(*req_iter, data_capture_node, EdgeId::INVALID());
 
     EdgeId clock_capture_edge = timing_graph.node_clock_capture_edge(data_capture_node);
-    if(clock_capture_edge) {
+    if (clock_capture_edge) {
         //Mark the edge between clock and data paths (i.e. setup/hold edge)
         data_required_element.set_incomming_edge(clock_capture_edge);
     }
 
     TimingPathInfo path_info(tag_retriever.type(),
-                             calc_path_delay(data_arrival_path),
-                             slack_tag.time(),
-                             find_startpoint(data_arrival_path),
-                             find_endpoint(data_arrival_path),
-                             launch_domain,
-                             capture_domain);
+        calc_path_delay(data_arrival_path),
+        slack_tag.time(),
+        find_startpoint(data_arrival_path),
+        find_endpoint(data_arrival_path),
+        launch_domain,
+        capture_domain);
 
     TimingPath path(path_info,
-                    clock_launch_path,
-                    data_arrival_path,
-                    clock_capture_path,
-                    data_required_element,
-                    slack_tag);
+        clock_launch_path,
+        data_arrival_path,
+        clock_capture_path,
+        data_required_element,
+        slack_tag);
 
     return path;
 }
 
 TimingSubPath trace_clock_launch_path(const TimingGraph& timing_graph,
-                                      const detail::TagRetriever& tag_retriever, 
-                                      const DomainId launch_domain,
-                                      const DomainId capture_domain,
-                                      const NodeId data_launch_node) {
+    const detail::TagRetriever& tag_retriever,
+    const DomainId launch_domain,
+    const DomainId capture_domain,
+    const NodeId data_launch_node) {
     TATUM_ASSERT(timing_graph.node_type(data_launch_node) == NodeType::SOURCE);
 
     /*
@@ -85,23 +84,22 @@ TimingSubPath trace_clock_launch_path(const TimingGraph& timing_graph,
      */
     std::vector<TimingPathElem> clock_launch_elements;
     EdgeId clock_launch_edge = timing_graph.node_clock_launch_edge(data_launch_node);
-    if(clock_launch_edge) {
-
+    if (clock_launch_edge) {
         //Through the clock network
         NodeId curr_node = timing_graph.edge_src_node(clock_launch_edge);
         TATUM_ASSERT(timing_graph.node_type(curr_node) == NodeType::CPIN);
 
-        while(curr_node) {
+        while (curr_node) {
             auto launch_tags = tag_retriever.tags(curr_node, TagType::CLOCK_LAUNCH);
             auto iter = find_tag(launch_tags, launch_domain, capture_domain);
-            if(iter == launch_tags.end()) {
+            if (iter == launch_tags.end()) {
                 //Then look for incompletely specified (i.e. wildcard) capture clocks
                 iter = find_tag(launch_tags, launch_domain, DomainId::INVALID());
             }
             TATUM_ASSERT(iter != launch_tags.end());
 
             EdgeId edge;
-            if(iter->origin_node()) {
+            if (iter->origin_node()) {
                 edge = timing_graph.find_edge(iter->origin_node(), curr_node);
                 TATUM_ASSERT(edge);
             }
@@ -120,10 +118,10 @@ TimingSubPath trace_clock_launch_path(const TimingGraph& timing_graph,
 }
 
 TimingSubPath trace_data_arrival_path(const TimingGraph& timing_graph,
-                                      const detail::TagRetriever& tag_retriever, 
-                                      const DomainId launch_domain,
-                                      const DomainId capture_domain,
-                                      const NodeId data_capture_node) {
+    const detail::TagRetriever& tag_retriever,
+    const DomainId launch_domain,
+    const DomainId capture_domain,
+    const NodeId data_capture_node) {
     TATUM_ASSERT(timing_graph.node_type(data_capture_node) == NodeType::SINK);
 
     /*
@@ -131,19 +129,19 @@ TimingSubPath trace_data_arrival_path(const TimingGraph& timing_graph,
      */
     std::vector<TimingPathElem> data_arrival_elements;
     NodeId curr_node = data_capture_node;
-    while(curr_node && timing_graph.node_type(curr_node) != NodeType::CPIN) {
+    while (curr_node && timing_graph.node_type(curr_node) != NodeType::CPIN) {
         //Trace until we hit the origin, or a clock pin
         auto data_tags = tag_retriever.tags(curr_node, TagType::DATA_ARRIVAL);
 
         //First try to find the exact tag match
         auto iter = find_tag(data_tags, launch_domain, capture_domain);
-        if(iter == data_tags.end()) {
+        if (iter == data_tags.end()) {
             //Then look for incompletely specified (i.e. wildcard) capture clocks
             iter = find_tag(data_tags, launch_domain, DomainId::INVALID());
 
             //Look for a constant generator
             if (iter == data_tags.end()) {
-                iter = find_tag(data_tags, DomainId::INVALID(), DomainId::INVALID()); 
+                iter = find_tag(data_tags, DomainId::INVALID(), DomainId::INVALID());
                 TATUM_ASSERT(iter != data_tags.end());
                 TATUM_ASSERT(is_const_gen_tag(*iter));
             }
@@ -151,7 +149,7 @@ TimingSubPath trace_data_arrival_path(const TimingGraph& timing_graph,
         TATUM_ASSERT(iter != data_tags.end());
 
         EdgeId edge;
-        if(iter->origin_node()) {
+        if (iter->origin_node()) {
             edge = timing_graph.find_edge(iter->origin_node(), curr_node);
             TATUM_ASSERT(edge);
         }
@@ -164,7 +162,7 @@ TimingSubPath trace_data_arrival_path(const TimingGraph& timing_graph,
     }
 
     EdgeId clock_launch_edge = timing_graph.node_clock_launch_edge(data_arrival_elements.back().node());
-    if(clock_launch_edge) {
+    if (clock_launch_edge) {
         //Mark the edge between clock and data paths (i.e. setup/hold edge)
         data_arrival_elements.back().set_incomming_edge(clock_launch_edge);
     }
@@ -176,10 +174,10 @@ TimingSubPath trace_data_arrival_path(const TimingGraph& timing_graph,
 }
 
 TimingSubPath trace_clock_capture_path(const TimingGraph& timing_graph,
-                                       const detail::TagRetriever& tag_retriever, 
-                                       const DomainId launch_domain,
-                                       const DomainId capture_domain,
-                                       const NodeId data_capture_node) {
+    const detail::TagRetriever& tag_retriever,
+    const DomainId launch_domain,
+    const DomainId capture_domain,
+    const NodeId data_capture_node) {
     TATUM_ASSERT(timing_graph.node_type(data_capture_node) == NodeType::SINK);
     /*
      * Backtrace the clock capture path
@@ -187,19 +185,18 @@ TimingSubPath trace_clock_capture_path(const TimingGraph& timing_graph,
     std::vector<TimingPathElem> clock_capture_elements;
 
     EdgeId clock_capture_edge = timing_graph.node_clock_capture_edge(data_capture_node);
-    if(clock_capture_edge) {
+    if (clock_capture_edge) {
         NodeId curr_node = timing_graph.edge_src_node(clock_capture_edge);
         TATUM_ASSERT(timing_graph.node_type(curr_node) == NodeType::CPIN);
 
-        while(curr_node) {
-
+        while (curr_node) {
             //Record the clock capture tag
             auto capture_tags = tag_retriever.tags(curr_node, TagType::CLOCK_CAPTURE);
             auto iter = find_tag(capture_tags, launch_domain, capture_domain);
             TATUM_ASSERT(iter != capture_tags.end());
 
             EdgeId edge;
-            if(iter->origin_node()) {
+            if (iter->origin_node()) {
                 edge = timing_graph.find_edge(iter->origin_node(), curr_node);
                 TATUM_ASSERT(edge);
             }
@@ -217,10 +214,10 @@ TimingSubPath trace_clock_capture_path(const TimingGraph& timing_graph,
 }
 
 TimingSubPath trace_skew_clock_launch_path(const TimingGraph& timing_graph,
-                                           const detail::TagRetriever& tag_retriever, 
-                                           const DomainId launch_domain,
-                                           const DomainId capture_domain,
-                                           const NodeId data_launch_node) {
+    const detail::TagRetriever& tag_retriever,
+    const DomainId launch_domain,
+    const DomainId capture_domain,
+    const NodeId data_launch_node) {
     TimingSubPath subpath = trace_clock_launch_path(timing_graph, tag_retriever, launch_domain, capture_domain, data_launch_node);
 
     //A primary input may have no actual clock path, since the data arrival time is marked directly
@@ -238,10 +235,10 @@ TimingSubPath trace_skew_clock_launch_path(const TimingGraph& timing_graph,
 }
 
 TimingSubPath trace_skew_clock_capture_path(const TimingGraph& timing_graph,
-                                            const detail::TagRetriever& tag_retriever, 
-                                            const DomainId launch_domain,
-                                            const DomainId capture_domain,
-                                            const NodeId data_capture_node) {
+    const detail::TagRetriever& tag_retriever,
+    const DomainId launch_domain,
+    const DomainId capture_domain,
+    const NodeId data_capture_node) {
     TimingSubPath subpath = trace_clock_capture_path(timing_graph, tag_retriever, launch_domain, capture_domain, data_capture_node);
 
     //A primary output may have no actual clock path, since the data required time is marked directly
@@ -286,8 +283,9 @@ NodeId find_startpoint(const TimingSubPath& path) {
 
 NodeId find_endpoint(const TimingSubPath& path) {
     TATUM_ASSERT(path.elements().size() > 0);
-    
+
     return (--path.elements().end())->node();
 }
 
-}} //namespace
+}  // namespace detail
+}  // namespace tatum

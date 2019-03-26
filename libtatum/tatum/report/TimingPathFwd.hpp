@@ -7,6 +7,6 @@ class TimingPathInfo;
 class TimingPathElem;
 class TimingPath;
 
-} //namespace
+}  // namespace tatum
 
 #endif

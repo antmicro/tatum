@@ -1,7 +1,7 @@
 #include "tatumparse_lexer.hpp"
-#include "tatumparse_lexer.gen.h" //For tatumparse_lex_*()
+#include "tatumparse_lexer.gen.h"  //For tatumparse_lex_*()
 
-extern YY_DECL; //For tatumparse_lex()
+extern YY_DECL;  //For tatumparse_lex()
 
 namespace tatumparse {
 
@@ -27,4 +27,4 @@ int Lexer::lineno() const {
     return tatumparse_get_lineno(state_);
 }
 
-}
+}  // namespace tatumparse

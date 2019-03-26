@@ -32,10 +32,10 @@
 #include "util.hpp"
 #include "profile.hpp"
 
-#if defined(TATUM_USE_CILK) 
-# include <cilk/cilk_api.h>
-#elif defined(TATUM_USE_TBB) 
-# include <tbb/task_scheduler_init.h>
+#if defined(TATUM_USE_CILK)
+#include <cilk/cilk_api.h>
+#elif defined(TATUM_USE_TBB)
+#include <tbb/task_scheduler_init.h>
 #endif
 typedef std::chrono::duration<double> dsec;
 typedef std::chrono::high_resolution_clock Clock;
@@ -43,14 +43,14 @@ typedef std::chrono::high_resolution_clock Clock;
 using std::cout;
 using std::endl;
 
+using tatum::DomainId;
+using tatum::EdgeId;
+using tatum::NodeId;
 using tatum::Time;
+using tatum::TimingConstraints;
+using tatum::TimingGraph;
 using tatum::TimingTag;
 using tatum::TimingTags;
-using tatum::TimingGraph;
-using tatum::TimingConstraints;
-using tatum::NodeId;
-using tatum::EdgeId;
-using tatum::DomainId;
 
 struct Args {
     //Input file to load
@@ -83,7 +83,7 @@ struct Args {
     //Print reports
     size_t report = 1;
 
-    //Timing graph node whose transitive fanout is included in the 
+    //Timing graph node whose transitive fanout is included in the
     //dumped .dot file (useful for debugging). Values < 0 dump the
     //entire graph.
     int debug_dot_node = -1;
@@ -95,7 +95,6 @@ Args parse_args(int argc, char** argv);
 
 double median(std::vector<double> values);
 double arithmean(std::vector<double> values);
-
 
 void usage(std::string prog) {
     Args default_args;
@@ -157,40 +156,38 @@ Args parse_args(int argc, char** argv) {
 
     int i = 1;
     while (i < argc) {
-
         std::string arg_str(argv[i]);
         if (arg_str == "-h" || arg_str == "--help") {
             usage(prog);
             exit(0);
         } else if (arg_str.size() >= 2 && arg_str[0] == '-' && arg_str[1] == '-') {
             if (arg_str == "--write_echo") {
-                args.write_echo = argv[i+1];
+                args.write_echo = argv[i + 1];
             } else {
-
-                std::istringstream ss(argv[i+1]);
+                std::istringstream ss(argv[i + 1]);
                 float arg_val;
                 ss >> arg_val;
                 if (ss.fail() || !ss.eof()) {
                     std::stringstream msg;
-                    msg << "Invalid option value '" << argv[i+1] << "'\n";
+                    msg << "Invalid option value '" << argv[i + 1] << "'\n";
                     cmd_error(prog, msg.str());
                 }
 
                 if (arg_str == "--num_workers") {
                     args.num_workers = arg_val;
-                } else if (argv[i] == std::string("--num_serial")) { 
+                } else if (argv[i] == std::string("--num_serial")) {
                     args.num_serial_runs = arg_val;
-                } else if (argv[i] == std::string("--num_parallel")) { 
+                } else if (argv[i] == std::string("--num_parallel")) {
                     args.num_parallel_runs = arg_val;
-                } else if (argv[i] == std::string("--unit_delay")) { 
+                } else if (argv[i] == std::string("--unit_delay")) {
                     args.unit_delay = arg_val;
-                } else if (argv[i] == std::string("--opt_graph_layout")) { 
+                } else if (argv[i] == std::string("--opt_graph_layout")) {
                     args.opt_graph_layout = arg_val;
-                } else if (argv[i] == std::string("--verify")) { 
+                } else if (argv[i] == std::string("--verify")) {
                     args.verify = arg_val;
-                } else if (argv[i] == std::string("--report")) { 
+                } else if (argv[i] == std::string("--report")) {
                     args.report = arg_val;
-                } else if (argv[i] == std::string("--debug_dot_node")) { 
+                } else if (argv[i] == std::string("--debug_dot_node")) {
                     args.debug_dot_node = arg_val;
                 } else {
                     std::stringstream msg;
@@ -200,12 +197,12 @@ Args parse_args(int argc, char** argv) {
             }
 
             i += 2;
-        } else { 
+        } else {
             if (i == argc - 1) {
                 args.input_file = arg_str;
             } else {
                 std::stringstream msg;
-                msg << "Unrecognized positional argument '" << arg_str<< "'\n";
+                msg << "Unrecognized positional argument '" << arg_str << "'\n";
                 cmd_error(prog, msg.str());
             }
             i++;
@@ -220,7 +217,6 @@ Args parse_args(int argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
-
     Args args = parse_args(argc, argv);
 
     int exit_code = 0;
@@ -265,14 +261,14 @@ int main(int argc, char** argv) {
         exit(1);
     }
     cout << "Tatum executing with up to " << actual_num_workers << " workers via cilk\n";
-#elif defined(TATUM_USE_TBB) 
+#elif defined(TATUM_USE_TBB)
     size_t actual_num_workers = args.num_workers;
     if (actual_num_workers == 0) {
         actual_num_workers = tbb::task_scheduler_init::default_num_threads();
     }
     auto tbb_scheduler = std::make_unique<tbb::task_scheduler_init>(actual_num_workers);
     cout << "Tatum executing with up to " << actual_num_workers << " workers via TBB\n";
-#else //Serial
+#else  //Serial
     cout << "Tatum built with only serial execution support, ignoring --num_workers != 1\n";
 #endif
 
@@ -287,7 +283,7 @@ int main(int argc, char** argv) {
 
         //Load the echo file
         EchoLoader loader;
-        if(args.input_file == "-") {
+        if (args.input_file == "-") {
             tatum_parse_file(stdin, loader);
         } else {
             tatum_parse_filename(args.input_file, loader);
@@ -298,10 +294,10 @@ int main(int argc, char** argv) {
         timing_constraints = loader.timing_constraints();
         if (args.unit_delay) {
             delay_calculator = std::make_shared<tatum::FixedDelayCalculator>(
-                    tatum::util::linear_map<tatum::EdgeId,tatum::Time>(timing_graph->edges().size(), tatum::Time(args.unit_delay)),
-                    tatum::util::linear_map<tatum::EdgeId,tatum::Time>(timing_graph->edges().size(), tatum::Time(args.unit_delay)),
-                    tatum::util::linear_map<tatum::EdgeId,tatum::Time>(timing_graph->edges().size(), tatum::Time(args.unit_delay)),
-                    tatum::util::linear_map<tatum::EdgeId,tatum::Time>(timing_graph->edges().size(), tatum::Time(args.unit_delay)));
+                tatum::util::linear_map<tatum::EdgeId, tatum::Time>(timing_graph->edges().size(), tatum::Time(args.unit_delay)),
+                tatum::util::linear_map<tatum::EdgeId, tatum::Time>(timing_graph->edges().size(), tatum::Time(args.unit_delay)),
+                tatum::util::linear_map<tatum::EdgeId, tatum::Time>(timing_graph->edges().size(), tatum::Time(args.unit_delay)),
+                tatum::util::linear_map<tatum::EdgeId, tatum::Time>(timing_graph->edges().size(), tatum::Time(args.unit_delay)));
 
         } else {
             delay_calculator = loader.delay_calculator();
@@ -315,7 +311,6 @@ int main(int argc, char** argv) {
 
     timing_constraints->print_constraints();
 
-
     timing_graph->levelize();
     timing_graph->validate();
 
@@ -324,7 +319,6 @@ int main(int argc, char** argv) {
     cout << "Timing Graph Levels: " << timing_graph->levels().size() << "\n";
 
     if (args.opt_graph_layout) {
-        
         clock_gettime(CLOCK_MONOTONIC, &opt_start);
         auto id_maps = timing_graph->optimize_layout();
         clock_gettime(CLOCK_MONOTONIC, &opt_end);
@@ -357,7 +351,6 @@ int main(int argc, char** argv) {
      *cout << endl;
      */
 
-
     std::ofstream ofs(args.write_echo);
     if (!args.write_echo.empty()) {
         tatum::write_timing_graph(ofs, *timing_graph);
@@ -379,7 +372,7 @@ int main(int argc, char** argv) {
     //Performance variables
     float serial_verify_time = 0.;
     size_t serial_tags_verified = 0;
-    std::map<std::string,std::vector<double>> serial_prof_data;
+    std::map<std::string, std::vector<double>> serial_prof_data;
     {
         cout << "Running Serial Analysis " << args.num_serial_runs << " times" << endl;
 
@@ -387,10 +380,10 @@ int main(int argc, char** argv) {
 
         cout << "\n";
 
-        if(serial_analyzer->num_unconstrained_startpoints() > 0) {
+        if (serial_analyzer->num_unconstrained_startpoints() > 0) {
             cout << "Warning: " << serial_analyzer->num_unconstrained_startpoints() << " sources are unconstrained\n";
         }
-        if(serial_analyzer->num_unconstrained_endpoints() > 0) {
+        if (serial_analyzer->num_unconstrained_endpoints() > 0) {
             cout << "Warning: " << serial_analyzer->num_unconstrained_endpoints() << " sinks are unconstrained\n";
         }
 
@@ -414,7 +407,7 @@ int main(int argc, char** argv) {
         dot_writer.set_nodes_to_dump(nodes);
 
         std::shared_ptr<tatum::SetupTimingAnalyzer> echo_setup_analyzer = std::dynamic_pointer_cast<tatum::SetupTimingAnalyzer>(serial_analyzer);
-        if(args.report && echo_setup_analyzer) {
+        if (args.report && echo_setup_analyzer) {
             //write_dot_file_setup("tg_setup_annotated.dot", *timing_graph, *delay_calculator, *echo_setup_analyzer, nodes);
             dot_writer.write_dot_file("tg_setup_annotated.dot", *echo_setup_analyzer);
             timing_reporter.report_timing_setup("report_timing.setup.rpt", *echo_setup_analyzer);
@@ -426,7 +419,7 @@ int main(int argc, char** argv) {
             detailed_timing_reporter.report_unconstrained_setup("report_unconstrained_timing_detailed.setup.rpt", *echo_setup_analyzer);
         }
         std::shared_ptr<tatum::HoldTimingAnalyzer> echo_hold_analyzer = std::dynamic_pointer_cast<tatum::HoldTimingAnalyzer>(serial_analyzer);
-        if(args.report && echo_hold_analyzer) {
+        if (args.report && echo_hold_analyzer) {
             //write_dot_file_hold("tg_hold_annotated.dot", *timing_graph, *delay_calculator, *echo_hold_analyzer, nodes);
             dot_writer.write_dot_file("tg_hold_annotated.dot", *echo_hold_analyzer);
             timing_reporter.report_timing_hold("report_timing.hold.rpt", *echo_hold_analyzer);
@@ -446,7 +439,7 @@ int main(int argc, char** argv) {
 
             serial_tags_verified = res.first;
 
-            if(!res.second) {
+            if (!res.second) {
                 cout << "Verification failed!\n";
                 exit_code = 1;
             }
@@ -455,10 +448,9 @@ int main(int argc, char** argv) {
         clock_gettime(CLOCK_MONOTONIC, &verify_end);
         serial_verify_time += tatum::time_sec(verify_start, verify_end);
 
-
         cout << endl;
-        cout << "Serial Analysis took " << std::setprecision(6) << std::setw(6) << arithmean(serial_prof_data["analysis_sec"])*args.num_serial_runs << " sec";
-        if(serial_prof_data["analysis_sec"].size() > 0) {
+        cout << "Serial Analysis took " << std::setprecision(6) << std::setw(6) << arithmean(serial_prof_data["analysis_sec"]) * args.num_serial_runs << " sec";
+        if (serial_prof_data["analysis_sec"].size() > 0) {
             cout << " AVG: " << arithmean(serial_prof_data["analysis_sec"]);
             cout << " Median: " << median(serial_prof_data["analysis_sec"]);
             cout << " Min: " << *std::min_element(serial_prof_data["analysis_sec"].begin(), serial_prof_data["analysis_sec"].end());
@@ -467,32 +459,33 @@ int main(int argc, char** argv) {
         cout << endl;
 
         cout << "\tReset             Median: " << std::setprecision(6) << std::setw(6) << median(serial_prof_data["reset_sec"]) << " s";
-        cout << " (" << std::setprecision(2) << median(serial_prof_data["reset_sec"])/median(serial_prof_data["analysis_sec"]) << ")" << endl;
+        cout << " (" << std::setprecision(2) << median(serial_prof_data["reset_sec"]) / median(serial_prof_data["analysis_sec"]) << ")" << endl;
 
         cout << "\tArr Pre-traversal Median: " << std::setprecision(6) << std::setw(6) << median(serial_prof_data["arrival_pre_traversal_sec"]) << " s";
-        cout << " (" << std::setprecision(2) << median(serial_prof_data["arrival_pre_traversal_sec"])/median(serial_prof_data["analysis_sec"]) << ")" << endl;
+        cout << " (" << std::setprecision(2) << median(serial_prof_data["arrival_pre_traversal_sec"]) / median(serial_prof_data["analysis_sec"]) << ")" << endl;
 
         cout << "\tReq Pre-traversal Median: " << std::setprecision(6) << std::setw(6) << median(serial_prof_data["required_pre_traversal_sec"]) << " s";
-        cout << " (" << std::setprecision(2) << median(serial_prof_data["required_pre_traversal_sec"])/median(serial_prof_data["analysis_sec"]) << ")" << endl;
+        cout << " (" << std::setprecision(2) << median(serial_prof_data["required_pre_traversal_sec"]) / median(serial_prof_data["analysis_sec"]) << ")" << endl;
 
         cout << "\tArr     traversal Median: " << std::setprecision(6) << std::setw(6) << median(serial_prof_data["arrival_traversal_sec"]) << " s";
-        cout << " (" << std::setprecision(2) << median(serial_prof_data["arrival_traversal_sec"])/median(serial_prof_data["analysis_sec"]) << ")" << endl;
+        cout << " (" << std::setprecision(2) << median(serial_prof_data["arrival_traversal_sec"]) / median(serial_prof_data["analysis_sec"]) << ")" << endl;
 
         cout << "\tReq     traversal Median: " << std::setprecision(6) << std::setw(6) << median(serial_prof_data["required_traversal_sec"]) << " s";
-        cout << " (" << std::setprecision(2) << median(serial_prof_data["required_traversal_sec"])/median(serial_prof_data["analysis_sec"]) << ")" << endl;
+        cout << " (" << std::setprecision(2) << median(serial_prof_data["required_traversal_sec"]) / median(serial_prof_data["analysis_sec"]) << ")" << endl;
 
         cout << "\tUpdate slack      Median: " << std::setprecision(6) << std::setw(6) << median(serial_prof_data["update_slack_sec"]) << " s";
-        cout << " (" << std::setprecision(2) << median(serial_prof_data["update_slack_sec"])/median(serial_prof_data["analysis_sec"]) << ")" << endl;
+        cout << " (" << std::setprecision(2) << median(serial_prof_data["update_slack_sec"]) / median(serial_prof_data["analysis_sec"]) << ")" << endl;
 
         cout << "Verifying Serial Analysis took: " << serial_verify_time << " sec" << endl;
-        if(serial_tags_verified != golden_reference->num_tags() && serial_tags_verified != golden_reference->num_tags() / 2) {
+        if (serial_tags_verified != golden_reference->num_tags() && serial_tags_verified != golden_reference->num_tags() / 2) {
             //Potentially alow / 2 for setup only analysis from setup/hold golden
             cout << "WARNING: Expected tags (" << golden_reference->num_tags() << ") differs from tags checked (" << serial_tags_verified << ") , verification may not have occured!" << endl;
         } else {
-            cout << "\tVerified " << serial_tags_verified << " tags (expected " << golden_reference->num_tags() << " or " << golden_reference->num_tags()/2 << ") accross " << timing_graph->nodes().size() << " nodes" << endl;
+            cout << "\tVerified " << serial_tags_verified << " tags (expected " << golden_reference->num_tags() << " or " << golden_reference->num_tags() / 2 << ") accross " << timing_graph->nodes().size() << " nodes" << endl;
         }
         cout << endl;
-        cout << endl << "Net Serial Analysis elapsed time: " << serial_analyzer->get_profiling_data("total_analysis_sec") << " sec over " << serial_analyzer->get_profiling_data("num_full_updates") << " full updates" << endl;
+        cout << endl
+             << "Net Serial Analysis elapsed time: " << serial_analyzer->get_profiling_data("total_analysis_sec") << " sec over " << serial_analyzer->get_profiling_data("num_full_updates") << " full updates" << endl;
     }
 
     if (!args.write_echo.empty()) {
@@ -503,13 +496,13 @@ int main(int argc, char** argv) {
     std::cout << endl;
 
     if (args.num_parallel_runs) {
-        std::shared_ptr<tatum::TimingAnalyzer> parallel_analyzer = tatum::AnalyzerFactory<tatum::SetupHoldAnalysis,tatum::ParallelWalker>::make(*timing_graph, *timing_constraints, *delay_calculator);
+        std::shared_ptr<tatum::TimingAnalyzer> parallel_analyzer = tatum::AnalyzerFactory<tatum::SetupHoldAnalysis, tatum::ParallelWalker>::make(*timing_graph, *timing_constraints, *delay_calculator);
         auto parallel_setup_analyzer = std::dynamic_pointer_cast<tatum::SetupTimingAnalyzer>(parallel_analyzer);
         auto parallel_hold_analyzer = std::dynamic_pointer_cast<tatum::HoldTimingAnalyzer>(parallel_analyzer);
 
         float parallel_verify_time = 0;
         size_t parallel_tags_verified = 0;
-        std::map<std::string,std::vector<double>> parallel_prof_data;
+        std::map<std::string, std::vector<double>> parallel_prof_data;
         {
             cout << "Running Parrallel Analysis " << args.num_parallel_runs << " times" << endl;
 
@@ -525,7 +518,7 @@ int main(int argc, char** argv) {
 
                 parallel_tags_verified = res.first;
 
-                if(!res.second) {
+                if (!res.second) {
                     cout << "Verification failed!\n";
                     exit_code = 1;
                 }
@@ -535,8 +528,8 @@ int main(int argc, char** argv) {
             parallel_verify_time += tatum::time_sec(verify_start, verify_end);
 
             cout << endl;
-            cout << "Parallel Analysis took " << std::setprecision(6) << std::setw(6) << arithmean(parallel_prof_data["analysis_sec"])*args.num_parallel_runs << " sec";
-            if(parallel_prof_data["analysis_sec"].size() > 0) {
+            cout << "Parallel Analysis took " << std::setprecision(6) << std::setw(6) << arithmean(parallel_prof_data["analysis_sec"]) * args.num_parallel_runs << " sec";
+            if (parallel_prof_data["analysis_sec"].size() > 0) {
                 cout << " AVG: " << arithmean(parallel_prof_data["analysis_sec"]);
                 cout << " Median: " << median(parallel_prof_data["analysis_sec"]);
                 cout << " Min: " << *std::min_element(parallel_prof_data["analysis_sec"].begin(), parallel_prof_data["analysis_sec"].end());
@@ -545,33 +538,32 @@ int main(int argc, char** argv) {
             cout << endl;
 
             cout << "\tReset             Median: " << std::setprecision(6) << std::setw(6) << median(parallel_prof_data["reset_sec"]) << " s";
-            cout << " (" << std::setprecision(2) << median(parallel_prof_data["reset_sec"])/median(parallel_prof_data["analysis_sec"]) << ")" << endl;
+            cout << " (" << std::setprecision(2) << median(parallel_prof_data["reset_sec"]) / median(parallel_prof_data["analysis_sec"]) << ")" << endl;
 
             cout << "\tArr Pre-traversal Median: " << std::setprecision(6) << std::setw(6) << median(parallel_prof_data["arrival_pre_traversal_sec"]) << " s";
-            cout << " (" << std::setprecision(2) << median(parallel_prof_data["arrival_pre_traversal_sec"])/median(parallel_prof_data["analysis_sec"]) << ")" << endl;
+            cout << " (" << std::setprecision(2) << median(parallel_prof_data["arrival_pre_traversal_sec"]) / median(parallel_prof_data["analysis_sec"]) << ")" << endl;
 
             cout << "\tReq Pre-traversal Median: " << std::setprecision(6) << std::setw(6) << median(parallel_prof_data["required_pre_traversal_sec"]) << " s";
-            cout << " (" << std::setprecision(2) << median(parallel_prof_data["required_pre_traversal_sec"])/median(parallel_prof_data["analysis_sec"]) << ")" << endl;
+            cout << " (" << std::setprecision(2) << median(parallel_prof_data["required_pre_traversal_sec"]) / median(parallel_prof_data["analysis_sec"]) << ")" << endl;
 
             cout << "\tArr     traversal Median: " << std::setprecision(6) << std::setw(6) << median(parallel_prof_data["arrival_traversal_sec"]) << " s";
-            cout << " (" << std::setprecision(2) << median(parallel_prof_data["arrival_traversal_sec"])/median(parallel_prof_data["analysis_sec"]) << ")" << endl;
+            cout << " (" << std::setprecision(2) << median(parallel_prof_data["arrival_traversal_sec"]) / median(parallel_prof_data["analysis_sec"]) << ")" << endl;
 
             cout << "\tReq     traversal Median: " << std::setprecision(6) << std::setw(6) << median(parallel_prof_data["required_traversal_sec"]) << " s";
-            cout << " (" << std::setprecision(2) << median(parallel_prof_data["required_traversal_sec"])/median(parallel_prof_data["analysis_sec"]) << ")" << endl;
+            cout << " (" << std::setprecision(2) << median(parallel_prof_data["required_traversal_sec"]) / median(parallel_prof_data["analysis_sec"]) << ")" << endl;
 
             cout << "\tUpdate slack      Median: " << std::setprecision(6) << std::setw(6) << median(parallel_prof_data["update_slack_sec"]) << " s";
-            cout << " (" << std::setprecision(2) << median(parallel_prof_data["update_slack_sec"])/median(parallel_prof_data["analysis_sec"]) << ")" << endl;
+            cout << " (" << std::setprecision(2) << median(parallel_prof_data["update_slack_sec"]) / median(parallel_prof_data["analysis_sec"]) << ")" << endl;
 
-            cout << "Verifying Parallel Analysis took: " <<  parallel_verify_time<< " sec" << endl;
-            if(parallel_tags_verified != golden_reference->num_tags() && parallel_tags_verified != golden_reference->num_tags()/2) {
+            cout << "Verifying Parallel Analysis took: " << parallel_verify_time << " sec" << endl;
+            if (parallel_tags_verified != golden_reference->num_tags() && parallel_tags_verified != golden_reference->num_tags() / 2) {
                 //Potentially alow / 2 for setup only analysis from setup/hold golden
                 cout << "WARNING: Expected tags (" << golden_reference->num_tags() << ") differs from tags checked (" << serial_tags_verified << ") , verification may not have occured!" << endl;
             } else {
-                cout << "\tVerified " << serial_tags_verified << " tags (expected " << golden_reference->num_tags() << " or " << golden_reference->num_tags()/2 << ") accross " << timing_graph->nodes().size() << " nodes" << endl;
+                cout << "\tVerified " << serial_tags_verified << " tags (expected " << golden_reference->num_tags() << " or " << golden_reference->num_tags() / 2 << ") accross " << timing_graph->nodes().size() << " nodes" << endl;
             }
         }
         cout << endl;
-
 
         cout << "Parallel Speed-Up: " << std::fixed << median(serial_prof_data["analysis_sec"]) / median(parallel_prof_data["analysis_sec"]) << "x" << endl;
         cout << "\t            Reset: " << std::fixed << median(serial_prof_data["reset_sec"]) / median(parallel_prof_data["reset_sec"]) << "x" << endl;
@@ -582,28 +574,30 @@ int main(int argc, char** argv) {
         cout << "\t     Update-slack: " << std::fixed << median(serial_prof_data["update_slack_sec"]) / median(parallel_prof_data["update_slack_sec"]) << "x" << endl;
         cout << endl;
 
-        cout << endl << "Net Parallel Analysis elapsed time: " << parallel_analyzer->get_profiling_data("total_analysis_sec") << " sec over " << parallel_analyzer->get_profiling_data("num_full_updates") << " full updates" << endl;
+        cout << endl
+             << "Net Parallel Analysis elapsed time: " << parallel_analyzer->get_profiling_data("total_analysis_sec") << " sec over " << parallel_analyzer->get_profiling_data("num_full_updates") << " full updates" << endl;
     }
 
     //Tag stats
-    if(serial_setup_analyzer) {
+    if (serial_setup_analyzer) {
         print_setup_tags_histogram(*timing_graph, *serial_setup_analyzer);
     }
 
-    if(serial_hold_analyzer) {
+    if (serial_hold_analyzer) {
         print_hold_tags_histogram(*timing_graph, *serial_hold_analyzer);
     }
 
     //Critical paths
     cout << "\nCritical Paths:\n";
-    auto cpds = find_critical_paths(*timing_graph, *timing_constraints, *serial_setup_analyzer); 
-    for(auto cpd : cpds) {
+    auto cpds = find_critical_paths(*timing_graph, *timing_constraints, *serial_setup_analyzer);
+    for (auto cpd : cpds) {
         cout << "  " << cpd.launch_domain() << " -> " << cpd.capture_domain() << ": " << std::scientific << cpd.delay() << "\n";
     }
 
     clock_gettime(CLOCK_MONOTONIC, &prog_end);
 
-    cout << endl << "Total time: " << tatum::time_sec(prog_start, prog_end) << " sec" << endl;
+    cout << endl
+         << "Total time: " << tatum::time_sec(prog_start, prog_end) << " sec" << endl;
 
     return exit_code;
 }
@@ -611,8 +605,8 @@ int main(int argc, char** argv) {
 double median(std::vector<double> values) {
     std::sort(values.begin(), values.end());
 
-    if(values.size() % 2 == 0) {
-        return(values[values.size() / 2 - 1] + values[values.size() / 2]) / 2;
+    if (values.size() % 2 == 0) {
+        return (values[values.size() / 2 - 1] + values[values.size() / 2]) / 2;
     } else {
         return values[values.size() / 2];
     }

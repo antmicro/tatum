@@ -9,6 +9,6 @@ enum class ArrivalType {
     LATE
 };
 
-} //namespace
+}  // namespace tatum
 
 #endif

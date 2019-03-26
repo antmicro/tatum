@@ -8,6 +8,6 @@ class SetupTimingAnalyzer;
 class HoldTimingAnalyzer;
 class SetupHoldTimingAnalyzer;
 
-} //namespace
+}  // namespace tatum
 
 #endif

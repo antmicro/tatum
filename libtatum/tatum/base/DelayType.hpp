@@ -9,6 +9,6 @@ enum class DelayType {
     MIN
 };
 
-} //namespace
+}  // namespace tatum
 
 #endif

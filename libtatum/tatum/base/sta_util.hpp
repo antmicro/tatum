@@ -26,10 +26,7 @@ void print_node_fanout_histogram(const TimingGraph& tg, int nbuckets);
 void print_timing_graph(std::shared_ptr<const TimingGraph> tg);
 void print_levelization(std::shared_ptr<const TimingGraph> tg);
 
-void dump_level_times(std::string fname, const TimingGraph& timing_graph, std::map<std::string,float> serial_prof_data, std::map<std::string,float> parallel_prof_data);
-
-
-
+void dump_level_times(std::string fname, const TimingGraph& timing_graph, std::map<std::string, float> serial_prof_data, std::map<std::string, float> parallel_prof_data);
 
 void print_setup_tags_histogram(const TimingGraph& tg, const SetupTimingAnalyzer& analyzer);
 void print_hold_tags_histogram(const TimingGraph& tg, const HoldTimingAnalyzer& analyzer);
@@ -37,4 +34,4 @@ void print_hold_tags_histogram(const TimingGraph& tg, const HoldTimingAnalyzer& 
 void print_setup_tags(const TimingGraph& tg, const SetupTimingAnalyzer& analyzer);
 void print_hold_tags(const TimingGraph& tg, const HoldTimingAnalyzer& analyzer);
 
-} //namepsace
+}  // namespace tatum

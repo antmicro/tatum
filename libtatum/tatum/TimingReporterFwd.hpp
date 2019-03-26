@@ -6,5 +6,5 @@ namespace tatum {
 //A class for generating timing reports
 class TimingReporter;
 
-} //namespace
+}  // namespace tatum
 #endif

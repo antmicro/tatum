@@ -56,17 +56,16 @@ namespace tatum {
 ///\tparam Visitor The analysis type visitor (e.g. SetupAnalysis)
 ///\tparam GraphWalker The graph walker to use (defaults to serial traversals)
 template<class Visitor,
-         class GraphWalker>
+    class GraphWalker>
 struct AnalyzerFactory {
-
-    //We use the dependent_false template to detect if the un-specialized AnalyzerFactor 
+    //We use the dependent_false template to detect if the un-specialized AnalyzerFactor
     //template is being instantiated
     template<typename T>
     struct dependent_false : std::false_type {};
 
     //Error if the unspecialized template is instantiated
     static_assert(dependent_false<Visitor>::value,
-                  "Must specify a specialized analysis visitor type (e.g. SetupAnalysis, HoldAnalysis, SetupHoldAnalysis)");
+        "Must specify a specialized analysis visitor type (e.g. SetupAnalysis, HoldAnalysis, SetupHoldAnalysis)");
 
     //We provide the function definition to avoid spurious errors when the
     //unspecialized template is instantiated
@@ -80,55 +79,49 @@ struct AnalyzerFactory {
     ///
     ///\returns std::unique_ptr to the analyzer
     static std::unique_ptr<TimingAnalyzer> make(const TimingGraph& timing_graph,
-                                                const TimingConstraints& timing_constraints,
-                                                const DelayCalculator& delay_calc);
+        const TimingConstraints& timing_constraints,
+        const DelayCalculator& delay_calc);
 };
 
 //Specialize for setup
 template<class GraphWalker>
-struct AnalyzerFactory<SetupAnalysis,GraphWalker> {
-
+struct AnalyzerFactory<SetupAnalysis, GraphWalker> {
     static std::unique_ptr<SetupTimingAnalyzer> make(const TimingGraph& timing_graph,
-                                                     const TimingConstraints& timing_constraints,
-                                                     const DelayCalculator& delay_calc) {
+        const TimingConstraints& timing_constraints,
+        const DelayCalculator& delay_calc) {
         return std::unique_ptr<SetupTimingAnalyzer>(
-                new detail::FullSetupTimingAnalyzer<GraphWalker>(timing_graph, 
-                                                                 timing_constraints, 
-                                                                 delay_calc)
-                );
+            new detail::FullSetupTimingAnalyzer<GraphWalker>(timing_graph,
+                timing_constraints,
+                delay_calc));
     }
 };
 
 //Specialize for hold
 template<class GraphWalker>
-struct AnalyzerFactory<HoldAnalysis,GraphWalker> {
-
+struct AnalyzerFactory<HoldAnalysis, GraphWalker> {
     static std::unique_ptr<HoldTimingAnalyzer> make(const TimingGraph& timing_graph,
-                                                    const TimingConstraints& timing_constraints,
-                                                    const DelayCalculator& delay_calc) {
+        const TimingConstraints& timing_constraints,
+        const DelayCalculator& delay_calc) {
         return std::unique_ptr<HoldTimingAnalyzer>(
-                new detail::FullHoldTimingAnalyzer<GraphWalker>(timing_graph,
-                                                                timing_constraints, 
-                                                                delay_calc)
-                );
+            new detail::FullHoldTimingAnalyzer<GraphWalker>(timing_graph,
+                timing_constraints,
+                delay_calc));
     }
 };
 
 //Specialize for combined setup and hold
 template<class GraphWalker>
-struct AnalyzerFactory<SetupHoldAnalysis,GraphWalker> {
-
+struct AnalyzerFactory<SetupHoldAnalysis, GraphWalker> {
     static std::unique_ptr<SetupHoldTimingAnalyzer> make(const TimingGraph& timing_graph,
-                                                         const TimingConstraints& timing_constraints,
-                                                         const DelayCalculator& delay_calc) {
+        const TimingConstraints& timing_constraints,
+        const DelayCalculator& delay_calc) {
         return std::unique_ptr<SetupHoldTimingAnalyzer>(
-                new detail::FullSetupHoldTimingAnalyzer<GraphWalker>(timing_graph, 
-                                                                     timing_constraints, 
-                                                                     delay_calc)
-                );
+            new detail::FullSetupHoldTimingAnalyzer<GraphWalker>(timing_graph,
+                timing_constraints,
+                delay_calc));
     }
 };
 
-} //namepsace
+}  // namespace tatum
 
 #endif

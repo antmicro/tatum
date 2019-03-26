@@ -17,4 +17,4 @@ void write_delay_model(std::ostream& os, const TimingGraph& tg, const DelayCalcu
 void write_echo(std::string filename, const TimingGraph& tg, const TimingConstraints& tc, const DelayCalculator& dc, const std::shared_ptr<const TimingAnalyzer> analyzer);
 void write_echo(std::ostream& os, const TimingGraph& tg, const TimingConstraints& tc, const DelayCalculator& dc, const std::shared_ptr<const TimingAnalyzer> analyzer);
 
-}
+}  // namespace tatum

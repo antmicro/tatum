@@ -11,7 +11,6 @@
 
 #include "tatum/util/tatum_assert.hpp"
 
-
 namespace tatum {
 
 /** \file
@@ -58,15 +57,14 @@ namespace tatum {
  * \see CommonAnalysisVisitor
  */
 class HoldAnalysis : public detail::CommonAnalysisVisitor<detail::HoldAnalysisOps> {
-
     public:
-        HoldAnalysis(size_t num_tags, size_t num_slacks)
-            : detail::CommonAnalysisVisitor<detail::HoldAnalysisOps>(num_tags, num_slacks) {}
+    HoldAnalysis(size_t num_tags, size_t num_slacks)
+        : detail::CommonAnalysisVisitor<detail::HoldAnalysisOps>(num_tags, num_slacks) {}
 
-        TimingTags::tag_range hold_tags(const NodeId node) const { return ops_.get_tags(node); }
-        TimingTags::tag_range hold_tags(const NodeId node, TagType type) const { return ops_.get_tags(node, type); }
-        TimingTags::tag_range hold_edge_slacks(const EdgeId edge) const { return ops_.get_edge_slacks(edge); }
-        TimingTags::tag_range hold_node_slacks(const NodeId node) const { return ops_.get_node_slacks(node); }
+    TimingTags::tag_range hold_tags(const NodeId node) const { return ops_.get_tags(node); }
+    TimingTags::tag_range hold_tags(const NodeId node, TagType type) const { return ops_.get_tags(node, type); }
+    TimingTags::tag_range hold_edge_slacks(const EdgeId edge) const { return ops_.get_edge_slacks(edge); }
+    TimingTags::tag_range hold_node_slacks(const NodeId node) const { return ops_.get_node_slacks(node); }
 };
 
-} //namepsace
+}  // namespace tatum

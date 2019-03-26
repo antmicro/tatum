@@ -10,6 +10,6 @@ enum class TimingType {
     UNKOWN
 };
 
-} //namespace
+}  // namespace tatum
 
 #endif

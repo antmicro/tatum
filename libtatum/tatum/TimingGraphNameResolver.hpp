@@ -9,9 +9,9 @@
 namespace tatum {
 
 struct DelayComponent {
-    std::string type_name; //Type of element
-    std::string inst_name; //Unique identifier of element
-    Time delay; //Associated delay of element
+    std::string type_name;  //Type of element
+    std::string inst_name;  //Unique identifier of element
+    Time delay;             //Associated delay of element
 };
 
 struct EdgeDelayBreakdown {
@@ -21,16 +21,16 @@ struct EdgeDelayBreakdown {
 //Abstract interface for resolving timing graph nodes to human-readable strings
 class TimingGraphNameResolver {
     public:
-        virtual ~TimingGraphNameResolver() = default;
+    virtual ~TimingGraphNameResolver() = default;
 
-        virtual std::string node_name(tatum::NodeId node) const = 0;
-        virtual std::string node_type_name(tatum::NodeId node) const = 0;
-        virtual EdgeDelayBreakdown edge_delay_breakdown(tatum::EdgeId /*edge*/, DelayType /*delay_type*/) const {
-            //Default no edge delay breakdown
-            return EdgeDelayBreakdown();
-        }
+    virtual std::string node_name(tatum::NodeId node) const = 0;
+    virtual std::string node_type_name(tatum::NodeId node) const = 0;
+    virtual EdgeDelayBreakdown edge_delay_breakdown(tatum::EdgeId /*edge*/, DelayType /*delay_type*/) const {
+        //Default no edge delay breakdown
+        return EdgeDelayBreakdown();
+    }
 };
 
-} //namespace
+}  // namespace tatum
 
 #endif

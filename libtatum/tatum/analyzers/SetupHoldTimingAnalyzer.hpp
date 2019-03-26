@@ -21,5 +21,4 @@ class SetupHoldTimingAnalyzer : public SetupTimingAnalyzer, public HoldTimingAna
     // instance).
 };
 
-
-} //namepsace
+}  // namespace tatum

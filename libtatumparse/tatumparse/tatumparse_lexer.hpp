@@ -1,8 +1,8 @@
 #ifndef TATUM_LEXER_HPP
 #define TATUM_LEXER_HPP
 
-#include "tatumparse.hpp" //For tatumparse::Callback
-#include "tatumparse_parser.hpp" //For Parser::symbol_type
+#include "tatumparse.hpp"         //For tatumparse::Callback
+#include "tatumparse_parser.hpp"  //For Parser::symbol_type
 
 namespace tatumparse {
 
@@ -10,17 +10,18 @@ typedef void* yyscan_t;
 
 class Lexer {
     public:
-        Lexer(FILE* file, Callback& callback);
-        ~Lexer();
-        Parser::symbol_type next_token();
-        const char* text() const;
-        int lineno() const;
+    Lexer(FILE* file, Callback& callback);
+    ~Lexer();
+    Parser::symbol_type next_token();
+    const char* text() const;
+    int lineno() const;
+
     private:
-        yyscan_t state_;
-        Callback& callback_;
+    yyscan_t state_;
+    Callback& callback_;
 };
 
-} //namespace
+}  // namespace tatumparse
 
 /*
  * The YY_DECL is used by flex to specify the signature of the main
